@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: chicho-ia
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false   # Render te la pide al crear el servicio; nunca va en el repo
+      - key: RATE_MAX
+        value: "20"
+      - key: RATE_WINDOW_MIN
+        value: "10"
