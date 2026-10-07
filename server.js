@@ -5,8 +5,9 @@ import Anthropic from "@anthropic-ai/sdk";
 import { RULES_BASE, MODES } from "./prompts.js";
 
 const PORT = process.env.PORT || 3000;
-const MODEL = "claude-opus-5-5";
-const EFFORT = { quick: "low", default: "medium", complex: "high" };
+// Claude Fable 5.1: el modelo más capaz de Anthropic (piensa siempre antes de responder)
+const MODEL = process.env.CHICHO_MODEL || "claude-fable-5-1";
+const EFFORT = { quick: "medium", default: "high", complex: "xhigh" };
 
 // Límites anti-abuso (ajústalos con variables de entorno)
 const RATE_MAX = Number(process.env.RATE_MAX || 20);                 // mensajes por ventana por IP
@@ -61,7 +62,7 @@ app.post("/api/chat", async (req, res) => {
   if (!messages) return res.status(400).json({ error: "Mensaje inválido." });
 
   const system = RULES_BASE + (MODES[req.body?.mode] || "");
-  const effort = EFFORT[req.body?.tier] || "medium";
+  const effort = EFFORT[req.body?.tier] || "high";
 
   // Respuesta en streaming: una línea JSON por evento
   res.setHeader("Content-Type", "application/x-ndjson; charset=utf-8");
@@ -71,7 +72,7 @@ app.post("/api/chat", async (req, res) => {
 
   const stream = client.beta.messages.stream({
     model: MODEL,
-    max_tokens: 32000,
+    max_tokens: 64000,
     system,
     messages,
     output_config: { effort },
